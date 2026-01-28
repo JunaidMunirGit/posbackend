@@ -7,6 +7,6 @@ namespace Pos.Application.Auth.Dtos
     public class RefreshResponse
     {
         public required string AccessToken { get; set; }
-        public DateTime AccessTokenExpire { get; set; }
+        public DateTime AccessTokenExpiresDate { get; set; }
     }
 }

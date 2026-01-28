@@ -4,7 +4,9 @@ using System.Text;
 
 namespace Pos.Application.Auth.Dtos
 {
-    internal class AuthResponse
+    public class AuthResponse
     {
+        public string AccessToken { get; set; } = default!;
+        public DateTime AccessTokenExpiresDate { get; set; }
     }
 }

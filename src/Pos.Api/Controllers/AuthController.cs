@@ -2,8 +2,11 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Pos.Application.Auth.Dtos;
+using Pos.Domain.Entities;
+using Pos.Domain.Enums;
 using Pos.Infrastructure.Persistence;
 using Pos.Infrastructure.Security;
 using System.IdentityModel.Tokens.Jwt;
@@ -37,23 +40,22 @@ namespace Pos.Api.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest req, CancellationToken ct)
         {
-            // normalize email
             var email = req.Email.Trim().ToLowerInvariant();
 
             var exists = await _db.Users.AnyAsync(u => u.Email.ToLower() == email, ct);
             if (exists)
             {
-                // Safe default: avoid "email already exists" enumeration
                 return BadRequest(new { error = "Unable to register with provided credentials." });
             }
 
             var user = new User
             {
-                Id = Guid.NewGuid(),
                 Email = email,
-                // If you have Status/IsActive fields, set them here:
-                // IsActive = true,
-                // CreatedDate = DateTime.UtcNow,
+                PasswordHash = _hasher.HashPassword(null!, req.Password),
+                Status = UserStatus.Active,
+                CreatedDate = DateTime.UtcNow,
+                UpdatedDate = DateTime.UtcNow,
+                IsActive = true
             };
 
             user.PasswordHash = _hasher.HashPassword(user, req.Password);
@@ -64,15 +66,15 @@ namespace Pos.Api.Controllers
             var (accessToken, expiresAt) = CreateAccessToken(user);
 
             // create refresh token record (hashed)
-            var rawRefresh = TokenHelpers.GenerateRefreshToken();
-            var refreshHash = TokenHelpers.Sha256(rawRefresh);
+            var rawRefresh = TokenHelper.GenerateRefreshToken();
+            var refreshHash = TokenHelper.Sha256(rawRefresh);
 
             _db.RefreshTokens.Add(new RefreshToken
             {
                 UserId = user.Id,
                 TokenHash = refreshHash,
-                CreatedAtUtc = DateTime.UtcNow,
-                ExpiresAtUtc = DateTime.UtcNow.Add(RefreshTokenTtl)
+                CreatedDate = DateTime.UtcNow,
+                ExpiresDate = DateTime.UtcNow.Add(RefreshTokenTtl)
             });
 
             await _db.SaveChangesAsync(ct);
@@ -82,7 +84,7 @@ namespace Pos.Api.Controllers
             return Ok(new AuthResponse
             {
                 AccessToken = accessToken,
-                AccessTokenExpiresAtUtc = expiresAt
+                AccessTokenExpiresDate = expiresAt
             });
         }
 
@@ -109,15 +111,15 @@ namespace Pos.Api.Controllers
             var (accessToken, expiresAt) = CreateAccessToken(user);
 
             // rotate: create new refresh token
-            var rawRefresh = TokenHelpers.GenerateRefreshToken();
-            var refreshHash = TokenHelpers.Sha256(rawRefresh);
+            var rawRefresh = TokenHelper.GenerateRefreshToken();
+            var refreshHash = TokenHelper.Sha256(rawRefresh);
 
             _db.RefreshTokens.Add(new RefreshToken
             {
                 UserId = user.Id,
                 TokenHash = refreshHash,
-                CreatedAtUtc = DateTime.UtcNow,
-                ExpiresAtUtc = DateTime.UtcNow.Add(RefreshTokenTtl)
+                CreatedDate = DateTime.UtcNow,
+                ExpiresDate = DateTime.UtcNow.Add(RefreshTokenTtl)
             });
 
             await _db.SaveChangesAsync(ct);
@@ -127,7 +129,7 @@ namespace Pos.Api.Controllers
             return Ok(new AuthResponse
             {
                 AccessToken = accessToken,
-                AccessTokenExpiresAtUtc = expiresAt
+                AccessTokenExpiresDate = expiresAt
             });
         }
 
@@ -141,7 +143,7 @@ namespace Pos.Api.Controllers
             if (string.IsNullOrWhiteSpace(rawRefresh))
                 return Unauthorized(new { error = "Invalid session." });
 
-            var refreshHash = TokenHelpers.Sha256(rawRefresh);
+            var refreshHash = TokenHelper.Sha256(rawRefresh);
 
             var token = await _db.RefreshTokens
                 .AsTracking()
@@ -155,18 +157,18 @@ namespace Pos.Api.Controllers
                 return Unauthorized(new { error = "Invalid session." });
 
             // Rotate refresh token: revoke old, create new
-            token.RevokedAtUtc = DateTime.UtcNow;
+            token.RevokedDate = DateTime.UtcNow;
 
-            var newRaw = TokenHelpers.GenerateRefreshToken();
-            var newHash = TokenHelpers.Sha256(newRaw);
+            var newRaw = TokenHelper.GenerateRefreshToken();
+            var newHash = TokenHelper.Sha256(newRaw);
             token.ReplacedByTokenHash = newHash;
 
             _db.RefreshTokens.Add(new RefreshToken
             {
                 UserId = user.Id,
                 TokenHash = newHash,
-                CreatedAtUtc = DateTime.UtcNow,
-                ExpiresAtUtc = DateTime.UtcNow.Add(RefreshTokenTtl)
+                CreatedDate = DateTime.UtcNow,
+                ExpiresDate = DateTime.UtcNow.Add(RefreshTokenTtl)
             });
 
             var (accessToken, expiresAt) = CreateAccessToken(user);
@@ -178,7 +180,7 @@ namespace Pos.Api.Controllers
             return Ok(new RefreshResponse
             {
                 AccessToken = accessToken,
-                AccessTokenExpiresAtUtc = expiresAt
+                AccessTokenExpiresDate = expiresAt
             });
         }
 
@@ -192,13 +194,13 @@ namespace Pos.Api.Controllers
             var rawRefresh = Request.Cookies["refresh_token"];
             if (!string.IsNullOrWhiteSpace(rawRefresh))
             {
-                var refreshHash = TokenHelpers.Sha256(rawRefresh);
+                var refreshHash = TokenHelper.Sha256(rawRefresh);
                 var token = await _db.RefreshTokens.AsTracking()
                     .FirstOrDefaultAsync(t => t.TokenHash == refreshHash, ct);
 
                 if (token != null && token.IsActive)
                 {
-                    token.RevokedAtUtc = DateTime.UtcNow;
+                    token.RevokedDate = DateTime.UtcNow;
                     await _db.SaveChangesAsync(ct);
                 }
             }
