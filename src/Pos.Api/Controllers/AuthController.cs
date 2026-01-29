@@ -17,22 +17,15 @@ namespace Pos.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(AppDbContext db, IPasswordHasher<User> hasher, IConfiguration config) : ControllerBase
     {
-        private readonly AppDbContext _db;
-        private readonly IPasswordHasher<User> _hasher;
-        private readonly IConfiguration _config;
+        private readonly AppDbContext _db = db;
+        private readonly IPasswordHasher<User> _hasher = hasher;
+        private readonly IConfiguration _config = config;
 
         private static readonly TimeSpan AccessTokenTtl = TimeSpan.FromMinutes(15);
         private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(30);
 
-
-        public AuthController(AppDbContext db, IPasswordHasher<User> hasher, IConfiguration config)
-        {
-            _db = db;
-            _hasher = hasher;
-            _config = config;
-        }
 
 
 
@@ -208,9 +201,9 @@ namespace Pos.Api.Controllers
             Response.Cookies.Delete("refresh_token", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = false,
                 SameSite = SameSiteMode.Strict,
-                Path = "/auth"
+                Path = "/api/auth"
             });
 
             return Ok(new { ok = true });
@@ -256,9 +249,9 @@ namespace Pos.Api.Controllers
             Response.Cookies.Append("refresh_token", rawRefresh, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = false,
                 SameSite = SameSiteMode.Strict,
-                Path = "/auth",
+                Path = "/api/auth",
                 Expires = DateTimeOffset.UtcNow.Add(RefreshTokenTtl)
             });
         }
