@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Pos.Application.Abstractions.Security;
@@ -13,7 +12,7 @@ using System.Text;
 
 namespace Pos.Infrastructure.Security;
 
-public class AuthService(AppDbContext db, IPasswordHasher<User> hasher, IConfiguration config) : IAuthService
+public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration config) : IAuthService
 {
     private static readonly TimeSpan AccessTokenTtl = TimeSpan.FromMinutes(15);
     private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(30);
@@ -34,7 +33,8 @@ public class AuthService(AppDbContext db, IPasswordHasher<User> hasher, IConfigu
             UpdatedDate = DateTime.UtcNow,
             IsActive = true
         };
-        user.PasswordHash = hasher.HashPassword(user, req.Password);
+        user.PasswordHash = hasher.Hash(req.Password);
+
 
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
@@ -70,9 +70,10 @@ public class AuthService(AppDbContext db, IPasswordHasher<User> hasher, IConfigu
         if (user == null)
             throw new UnauthorizedAccessException("Invalid credentials.");
 
-        var verify = hasher.VerifyHashedPassword(user, user.PasswordHash, req.Password);
-        if (verify == PasswordVerificationResult.Failed)
+        var verify = hasher.Hash(req.Password);
+        if (!hasher.Verify(req.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials.");
+
 
         var (accessToken, expiresAt) = CreateAccessToken(user);
 

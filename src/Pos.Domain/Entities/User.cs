@@ -10,12 +10,11 @@ namespace Pos.Domain.Entities
     {
         public int Id { get; set; }
         public required string Email { get; set; }
-        public required string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = "";
         public bool IsActive { get; set; }
         public UserStatus Status { get; set; } = UserStatus.Active;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
         public UserRole Role { get; set; }
-
     }
 }

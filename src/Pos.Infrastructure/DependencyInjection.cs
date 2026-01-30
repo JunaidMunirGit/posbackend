@@ -13,13 +13,20 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
+        
+        
         services.AddDbContext<AppDbContext>(opt =>
             opt.UseSqlServer(config.GetConnectionString("Default")));
 
+        
+        
         // Application sees only the interface, Infrastructure provides the implementation
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
+        
+        
         // Services used by CQRS handlers
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IAuthService, AuthService>();
 
 
