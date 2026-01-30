@@ -15,5 +15,7 @@ namespace Pos.Domain.Entities
         public UserStatus Status { get; set; } = UserStatus.Active;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
+        public UserRole Role { get; set; }
+
     }
 }

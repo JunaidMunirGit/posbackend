@@ -11,6 +11,20 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Abstractions\Persistence\" />
+    <Folder Include="Common\Behaviors\" />
+    <Folder Include="Common\Exceptions\" />
+    <Folder Include="Common\Mapping\" />
+    <Folder Include="Common\Results\" />
+    <Folder Include="Features\Products\Commands\Delete\" />
+    <Folder Include="Features\Products\Commands\Update\" />
+    <Folder Include="Features\Products\Dtos\" />
+    <Folder Include="Features\Products\Queries\GetById\" />
+    <Folder Include="Features\Products\Queries\GetByBarcode\" />
+    <Folder Include="Features\Products\Queries\List\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
