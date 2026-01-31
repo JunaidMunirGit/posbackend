@@ -10,7 +10,8 @@ using Pos.Application.Features.Auth.Dtos;
 namespace Pos.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Asp.Versioning.ApiVersion(1.0)]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class AuthController(IMediator mediator) : ControllerBase
 {
     private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(30);
@@ -57,10 +58,7 @@ public class AuthController(IMediator mediator) : ControllerBase
 
         Response.Cookies.Delete("refresh_token", new CookieOptions
         {
-            HttpOnly = true,
-            Secure = Request.IsHttps,
-            SameSite = SameSiteMode.Strict,
-            Path = "/api/auth"
+            Path = "/api/Auth"
         });
 
         return Ok(new { ok = true });
@@ -71,7 +69,7 @@ public class AuthController(IMediator mediator) : ControllerBase
         Response.Cookies.Append("refresh_token", rawRefresh, new CookieOptions
         {
             HttpOnly = true,
-            Secure = Request.IsHttps, // dev: http => false automatically
+            Secure = true, // dev: http => false automatically
             SameSite = SameSiteMode.Strict,
             Path = "/api/auth",
             Expires = DateTimeOffset.UtcNow.Add(RefreshTokenTtl)
