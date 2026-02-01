@@ -4,10 +4,17 @@ using Microsoft.IdentityModel.Tokens;
 using Pos.Api.Middleware;
 using Pos.Application;
 using Pos.Infrastructure;
+using Serilog;
 using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Host.UseSerilog((ctx, lc) =>
+    lc.ReadFrom.Configuration(ctx.Configuration)
+      .Enrich.FromLogContext());
+
 
 var jwt = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwt["Key"]!);
@@ -75,9 +82,10 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
+app.UseSerilogRequestLogging();
+
 app.UseMiddleware<SimpleIpRateLimitMiddleware>();
 app.UseMiddleware<Pos.Api.Middleware.ExceptionHandlingMiddleware>();
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
