@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Pos.Api.Security
+namespace Pos.Api.Middleware
 {
     public class SimpleIpRateLimitMiddleware : IMiddleware
     {

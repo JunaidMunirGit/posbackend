@@ -1,7 +1,7 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Pos.Api.Security;
+using Pos.Api.Middleware;
 using Pos.Application;
 using Pos.Infrastructure;
 using System.Text;
