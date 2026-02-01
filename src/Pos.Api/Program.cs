@@ -75,6 +75,8 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseMiddleware<SimpleIpRateLimitMiddleware>();
+app.UseMiddleware<Pos.Api.Middleware.ExceptionHandlingMiddleware>();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

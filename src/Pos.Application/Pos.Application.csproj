@@ -13,7 +13,6 @@
   <ItemGroup>
     <Folder Include="Abstractions\Persistence\" />
     <Folder Include="Common\Behaviors\" />
-    <Folder Include="Common\Exceptions\" />
     <Folder Include="Common\Mapping\" />
     <Folder Include="Common\Results\" />
     <Folder Include="Features\Products\Commands\Delete\" />
