@@ -22,7 +22,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
     {
         var (status, title) = ex switch
         {
-            ValidationException => (StatusCodes.Status400BadRequest, "Validation failed"),
+            AppValidationException => (StatusCodes.Status400BadRequest, "Validation failed"),
             NotFoundException => (StatusCodes.Status404NotFound, "Resource not found"),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
             _ => (StatusCodes.Status500InternalServerError, "Server error")
@@ -37,7 +37,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
         };
 
         // attach validation errors
-        if (ex is ValidationException vex)
+        if (ex is AppValidationException vex)
         {
             problem.Extensions["errors"] = vex.Errors;
         }

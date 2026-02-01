@@ -1,10 +1,10 @@
 ﻿namespace Pos.Application.Common.Exceptions;
 
-public class ValidationException : Exception
+public class AppValidationException : Exception
 {
     public IDictionary<string, string[]> Errors { get; }
 
-    public ValidationException(IDictionary<string, string[]> errors)
+    public AppValidationException(IDictionary<string, string[]> errors)
         : base("One or more validation errors occurred.")
     {
         Errors = errors;

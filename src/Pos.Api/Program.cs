@@ -45,6 +45,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 
+
 // Middleware DI
 builder.Services.AddScoped<SimpleIpRateLimitMiddleware>();
 
