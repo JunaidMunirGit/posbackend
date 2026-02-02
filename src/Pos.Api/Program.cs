@@ -1,8 +1,10 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Pos.Api.Middleware;
 using Pos.Application;
+using Pos.Application.Security;
 using Pos.Infrastructure;
 using Serilog;
 using System.Text;
@@ -38,6 +40,27 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.FromSeconds(30)
         };
     });
+
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ManageProducts",
+        policy => policy.Requirements.Add(
+            new PermissionRequirement("ManageProducts")));
+
+    options.AddPolicy("ViewProducts",
+        policy => policy.Requirements.Add(
+            new PermissionRequirement("ViewProducts")));
+});
+
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ManageProducts",
+        p => p.Requirements.Add(new PermissionRequirement("ManageProducts")));
+});
+
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 
 
 

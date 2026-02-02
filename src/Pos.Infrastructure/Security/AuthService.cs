@@ -39,7 +39,7 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
 
-        var (accessToken, expiresAt) = CreateAccessToken(user);
+        var (accessToken, expiresAt) = await CreateAccessTokenAsync(user,ct);
 
         var rawRefresh = TokenHelper.GenerateRefreshToken();
         var refreshHash = TokenHelper.Sha256(rawRefresh);
@@ -75,7 +75,7 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
             throw new UnauthorizedAccessException("Invalid credentials.");
 
 
-        var (accessToken, expiresAt) = CreateAccessToken(user);
+        var (accessToken, expiresAt) = await CreateAccessTokenAsync(user, ct);
 
         var rawRefresh = TokenHelper.GenerateRefreshToken();
         var refreshHash = TokenHelper.Sha256(rawRefresh);
@@ -127,7 +127,7 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
             ExpiresDate = DateTime.UtcNow.Add(RefreshTokenTtl)
         });
 
-        var (accessToken, expiresAt) = CreateAccessToken(user);
+        var (accessToken, expiresAt) = await CreateAccessTokenAsync(user, ct);
         await db.SaveChangesAsync(ct);
 
         return new RefreshResponse
@@ -152,37 +152,57 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
             await db.SaveChangesAsync(ct);
         }
     }
-
-    private (string token, DateTime expiresAtUtc) CreateAccessToken(User user)
+    private const string PermissionClaimType = "permission";
+    private async Task<(string token, DateTime expiresAtUtc)> CreateAccessTokenAsync(
+        User user,
+        CancellationToken ct)
     {
+        ArgumentNullException.ThrowIfNull(user);
+
         var jwtKey = config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
         var jwtIssuer = config["Jwt:Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer missing");
         var jwtAudience = config["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience missing");
+
+        var now = DateTime.UtcNow;
+        var expires = now.Add(AccessTokenTtl);
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
         var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email ?? "")
+    {
+        // Common JWT mapping: subject = user id
+        new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+        new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+    };
 
-        };
+        if (!string.IsNullOrWhiteSpace(user.Email))
+            claims.Add(new Claim(ClaimTypes.Email, user.Email));
 
+        // Pull permissions from roles
+        var permissions = await db.UserRoles
+            .Where(ur => ur.UserId == user.Id)
+            .SelectMany(ur => ur.Role.Permissions)
+            .Select(rp => rp.Permission)
+            .Distinct()
+            .ToListAsync(ct);
+
+        foreach (var permission in permissions)
+            claims.Add(new Claim(PermissionClaimType, permission.ToString()));
+
+        // If user can have multiple roles, add multiple ClaimTypes.Role claims instead.
         claims.Add(new Claim(ClaimTypes.Role, user.Role.ToString()));
-
-
-        var expires = DateTime.UtcNow.Add(AccessTokenTtl);
 
         var jwt = new JwtSecurityToken(
             issuer: jwtIssuer,
             audience: jwtAudience,
             claims: claims,
-            notBefore: DateTime.UtcNow,
+            notBefore: now,
             expires: expires,
             signingCredentials: creds
         );
 
-        return (new JwtSecurityTokenHandler().WriteToken(jwt), expires);
+        var token = new JwtSecurityTokenHandler().WriteToken(jwt);
+        return (token, expires);
     }
 }
