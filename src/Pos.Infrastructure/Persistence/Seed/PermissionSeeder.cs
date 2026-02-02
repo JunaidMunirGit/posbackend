@@ -1,6 +1,8 @@
 ﻿using Pos.Domain.Security;
 using Pos.Infrastructure.Persistence;
 
+namespace Pos.Infrastructure.Persistence.Seed;
+
 public static class PermissionSeeder
 {
     public static void Seed(AppDbContext db)

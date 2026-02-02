@@ -9,7 +9,7 @@ namespace Pos.Application.Features.Auth.Commands.Login
 {
     public class LoginHandler(IAuthService auth) : IRequestHandler<LoginCommand, AuthResponse>
     {
-        public Task<AuthResponse> Handle(LoginCommand cmd, CancellationToken ct)
-            => auth.LoginAsync(cmd.Request, ct);
+        public Task<AuthResponse> Handle(LoginCommand cmd, CancellationToken cancellationToken)
+            => auth.LoginAsync(cmd.Request, cancellationToken);
     }
 }

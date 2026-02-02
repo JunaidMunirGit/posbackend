@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pos.Application.Abstractions.Security;
+using Pos.Application.Security;
 using Pos.Domain.Entities;
 using Pos.Infrastructure.Abstractions.Persistence;
 using Pos.Infrastructure.Persistence;
@@ -28,6 +29,11 @@ public static class DependencyInjection
         // Services used by CQRS handlers
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IAuthService, AuthService>();
+
+
+
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, CurrentUser>();
 
 
         return services;

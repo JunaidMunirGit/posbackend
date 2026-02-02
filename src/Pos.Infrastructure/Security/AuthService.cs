@@ -16,6 +16,8 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
 {
     private static readonly TimeSpan AccessTokenTtl = TimeSpan.FromMinutes(15);
     private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(30);
+    private const string PermissionClaimType = "permission";
+
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest req, CancellationToken ct)
     {
@@ -39,7 +41,7 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
         db.Users.Add(user);
         await db.SaveChangesAsync(ct);
 
-        var (accessToken, expiresAt) = await CreateAccessTokenAsync(user,ct);
+        var (accessToken, expiresAt) = await CreateAccessTokenAsync(user, ct);
 
         var rawRefresh = TokenHelper.GenerateRefreshToken();
         var refreshHash = TokenHelper.Sha256(rawRefresh);
@@ -70,7 +72,6 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
         if (user == null)
             throw new UnauthorizedAccessException("Invalid credentials.");
 
-        var verify = hasher.Hash(req.Password);
         if (!hasher.Verify(req.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid credentials.");
 
@@ -105,7 +106,7 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
         var token = await db.RefreshTokens.AsTracking()
             .FirstOrDefaultAsync(t => t.TokenHash == refreshHash, ct);
 
-        if (token == null || !token.IsActive)
+        if (token?.IsActive != true)
             throw new UnauthorizedAccessException("Invalid session.");
 
         var user = await db.Users.FirstOrDefaultAsync(u => u.Id == token.UserId, ct);
@@ -146,16 +147,13 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
         var token = await db.RefreshTokens.AsTracking()
             .FirstOrDefaultAsync(t => t.TokenHash == refreshHash, ct);
 
-        if (token != null && token.IsActive)
+        if (token?.IsActive == true)
         {
             token.RevokedDate = DateTime.UtcNow;
             await db.SaveChangesAsync(ct);
         }
     }
-    private const string PermissionClaimType = "permission";
-    private async Task<(string token, DateTime expiresAtUtc)> CreateAccessTokenAsync(
-        User user,
-        CancellationToken ct)
+    private async Task<(string token, DateTime expiresAtUtc)> CreateAccessTokenAsync(User user, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(user);
 
@@ -170,11 +168,10 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
         var creds = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
-    {
-        // Common JWT mapping: subject = user id
-        new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-        new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-    };
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+        };
 
         if (!string.IsNullOrWhiteSpace(user.Email))
             claims.Add(new Claim(ClaimTypes.Email, user.Email));
@@ -189,6 +186,7 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
 
         foreach (var permission in permissions)
             claims.Add(new Claim(PermissionClaimType, permission.ToString()));
+
 
         // If user can have multiple roles, add multiple ClaimTypes.Role claims instead.
         claims.Add(new Claim(ClaimTypes.Role, user.Role.ToString()));

@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Pos.Application.Common.Exceptions;
 
-namespace Pos.Application.Common.Exceptions
+public class ForbiddenException : Exception
 {
-    internal class ForbiddenException
-    {
-    }
+    public ForbiddenException() { }
+
+    public ForbiddenException(string message)
+        : base(message) { }
+
+    public ForbiddenException(string message, Exception innerException)
+        : base(message, innerException) { }
 }

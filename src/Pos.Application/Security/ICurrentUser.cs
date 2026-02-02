@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Pos.Domain.Security;
 
-namespace Pos.Application.Security
+namespace Pos.Application.Security;
+
+public interface ICurrentUser
 {
-    internal interface ICurrentUser
-    {
-    }
+    bool HasPermission(Permission permission);
 }

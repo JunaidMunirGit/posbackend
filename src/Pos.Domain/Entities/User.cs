@@ -16,5 +16,8 @@ namespace Pos.Domain.Entities
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
         public UserRole Role { get; set; }
+
+        public ICollection<Pos.Domain.Security.UserRole> UserRoles { get; set; } = new List<Pos.Domain.Security.UserRole>();
+
     }
 }
