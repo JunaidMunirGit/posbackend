@@ -30,6 +30,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .HasKey(rp => new { rp.RoleId, rp.Permission }); // this is our composite keys
 
         modelBuilder.Entity<RolePermission>()
+            .Property(rp => rp.Permission)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<RolePermission>()
             .HasOne(rp => rp.Role)
             .WithMany(r => r.Permissions)
             .HasForeignKey(rp => rp.RoleId);
@@ -46,5 +50,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .HasOne(ur => ur.Role)
             .WithMany()
             .HasForeignKey(ur => ur.RoleId);
+
+        modelBuilder.Entity<Product>()
+            .Property(p => p.Price)
+            .HasPrecision(18, 2);
     }
 }
