@@ -8,15 +8,17 @@ namespace Pos.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController(IMediator mediator) : ControllerBase
+    public class ProductsController(IMediator mediator) : ControllerBase
     {
         private readonly IMediator _mediator = mediator;
 
 
-        public async Task<IActionResult> AssignRole([FromBody] AssignRoleCommand command)
+        [Authorize(Policy = "ManageProducts")]
+        [HttpPost("products")]
+        public async Task<IActionResult> Create(CreateProductCommand command)
         {
-            var result = await _mediator.Send(command);
-            return Ok(result);
+            var id = await _mediator.Send(command);
+            return Ok(new { id });
         }
     }
 }

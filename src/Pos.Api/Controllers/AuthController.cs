@@ -75,4 +75,11 @@ public class AuthController(IMediator mediator) : ControllerBase
             Expires = DateTimeOffset.UtcNow.Add(RefreshTokenTtl)
         });
     }
+
+    [HttpPost("assign-role")]
+    public async Task<IActionResult> AssignRole([FromBody] AssignRoleCommand command)
+    {
+        var result = await mediator.Send(command);
+        return Ok(result);
+    }
 }
