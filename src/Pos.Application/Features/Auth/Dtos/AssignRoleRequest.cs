@@ -4,8 +4,9 @@ using System.Text;
 
 namespace Pos.Application.Features.Auth.Dtos
 {
-    public class AssignRoleRequest
+    public sealed class AssignRoleRequest
     {
-        public record AssignRoleRequest(string Email, string RoleName);
+        public required int UserId { get; init; }
+        public required int RoleId { get; init; }
     }
 }

@@ -77,7 +77,7 @@ public class AuthController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("assign-role")]
-    public async Task<IActionResult> AssignRole([FromBody] AssignRoleCommand command)
+    public async Task<IActionResult> AssignRole([FromBody] AssignRoleRequest command)
     {
         var result = await mediator.Send(command);
         return Ok(result);

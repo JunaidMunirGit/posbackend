@@ -16,6 +16,7 @@
     <Folder Include="Abstractions\Persistence\" />
     <Folder Include="Common\Mapping\" />
     <Folder Include="Common\Results\" />
+    <Folder Include="Features\Auth\Commands\AssignRoleCommand\" />
     <Folder Include="Features\Products\Commands\Delete\" />
     <Folder Include="Features\Products\Commands\Update\" />
     <Folder Include="Features\Products\Dtos\" />
