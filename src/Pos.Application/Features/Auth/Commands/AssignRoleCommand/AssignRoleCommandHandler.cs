@@ -12,18 +12,18 @@ namespace Pos.Application.Features.Auth.Commands.AssignRoleCommand
 {
     public class AssignRoleCommandHandler(IAppDbContext db) : IRequestHandler<AssignRoleCommand, bool>
     {
-        public async Task<bool> Handle(AssignRoleCommand request, CancellationToken ct)
+        public async Task<bool> Handle(AssignRoleCommand request, CancellationToken cancellationToken)
         {
             var user = await db.Users
-                .FirstOrDefaultAsync(u => u.Id == request.UserId, ct)
+                .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken)
                 ?? throw new NotFoundException("User not found.");
 
             var role = await db.Roles
-                .FirstOrDefaultAsync(r => r.Id == request.RoleId, ct)
+                .FirstOrDefaultAsync(r => r.Id == request.RoleId, cancellationToken)
                 ?? throw new NotFoundException("Role not found.");
 
             var exists = await db.UserRoles
-                .AnyAsync(x => x.UserId == user.Id && x.RoleId == role.Id, ct);
+                .AnyAsync(x => x.UserId == user.Id && x.RoleId == role.Id, cancellationToken);
 
             if (exists) return true;
 
@@ -33,7 +33,7 @@ namespace Pos.Application.Features.Auth.Commands.AssignRoleCommand
                 RoleId = role.Id
             });
 
-            await db.SaveChangesAsync(ct);
+            await db.SaveChangesAsync(cancellationToken);
             return true;
         }
     }
