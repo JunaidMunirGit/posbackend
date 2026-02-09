@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Pos.Application.Features.Auth.Commands.RefreshToken
 {
-    public class RefreshTokenHandler(IAuthService auth) : IRequestHandler<RefreshTokenCommand, RefreshResponse>
+    public class RefreshTokenCommandHandler(IAuthService auth) : IRequestHandler<RefreshTokenCommand, RefreshResponse>
     {
         public Task<RefreshResponse> Handle(RefreshTokenCommand cmd, CancellationToken ct)
             => auth.RefreshAsync(cmd.RawRefreshToken, ct);

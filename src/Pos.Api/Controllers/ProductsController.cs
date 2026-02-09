@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Pos.Application.Features.Auth.Commands.AssignRoleCommand;
 using Pos.Application.Features.Products.Commands.CreateProduct;
 
 namespace Pos.Api.Controllers

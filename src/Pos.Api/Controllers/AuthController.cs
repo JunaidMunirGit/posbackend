@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Pos.Application.Features.Auth.Commands.AssignRoleCommand;
 using Pos.Application.Features.Auth.Commands.Login;
 using Pos.Application.Features.Auth.Commands.Logout;
 using Pos.Application.Features.Auth.Commands.RefreshToken;
@@ -76,10 +77,13 @@ public class AuthController(IMediator mediator) : ControllerBase
         });
     }
 
+
     [HttpPost("assign-role")]
-    public async Task<IActionResult> AssignRole([FromBody] AssignRoleRequest command)
+    [Authorize(Policy = "ManageUsers")]
+    public async Task<IActionResult> AssignRole([FromBody] AssignRoleRequest req, CancellationToken ct)
     {
-        var result = await mediator.Send(command);
-        return Ok(result);
+        var ok = await mediator.Send(new AssignRoleCommand(req.UserId, req.RoleId), ct);
+        return Ok(new { ok });
     }
+
 }

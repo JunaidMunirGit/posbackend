@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Pos.Application.Features.Auth.Commands.Logout
 {
-    public class LogoutHandler(IAuthService auth) : IRequestHandler<LogoutCommand>
+    public class LogoutCommandHandler(IAuthService auth) : IRequestHandler<LogoutCommand>
     {
         public async Task Handle(LogoutCommand cmd, CancellationToken ct)
             => await auth.LogoutAsync(cmd.RawRefreshToken, ct);

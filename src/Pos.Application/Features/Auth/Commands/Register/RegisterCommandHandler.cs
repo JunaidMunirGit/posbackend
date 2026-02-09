@@ -8,10 +8,10 @@ using System.Text;
 
 namespace Pos.Application.Features.Auth.Commands.Register
 {
-    public class RegisterHandler : IRequestHandler<RegisterCommand, AuthResponse>
+    public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResponse>
     {
         private readonly IAuthService _auth;
-        public RegisterHandler(IAuthService auth) => _auth = auth;
+        public RegisterCommandHandler(IAuthService auth) => _auth = auth;
 
         public Task<AuthResponse> Handle(RegisterCommand cmd, CancellationToken ct)
             => _auth.RegisterAsync(cmd.Request, ct);
