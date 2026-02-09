@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Pos.Application.Common.Interfaces;
 using Pos.Domain.Entities;
 using Pos.Domain.Security;
-using Pos.Infrastructure.Abstractions.Persistence;
 
 namespace Pos.Infrastructure.Persistence;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options)
-    : DbContext(options), IAppDbContext
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IAppDbContext
 {
 
 

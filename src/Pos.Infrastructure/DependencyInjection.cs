@@ -2,9 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pos.Application.Abstractions.Security;
+using Pos.Application.Common.Interfaces;
 using Pos.Application.Security;
 using Pos.Domain.Entities;
-using Pos.Infrastructure.Abstractions.Persistence;
 using Pos.Infrastructure.Persistence;
 using Pos.Infrastructure.Security;
 

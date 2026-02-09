@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Pos.Application.Common.Exceptions;
+using Pos.Application.Common.Interfaces;
 using Pos.Application.Security;
 using Pos.Domain.Entities;
 using Pos.Domain.Security;
-using Pos.Infrastructure.Abstractions.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Text;
