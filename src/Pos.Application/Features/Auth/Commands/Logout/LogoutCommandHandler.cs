@@ -8,7 +8,7 @@ namespace Pos.Application.Features.Auth.Commands.Logout
 {
     public class LogoutCommandHandler(IAuthService auth) : IRequestHandler<LogoutCommand>
     {
-        public async Task Handle(LogoutCommand cmd, CancellationToken ct)
-            => await auth.LogoutAsync(cmd.RawRefreshToken, ct);
+        public async Task Handle(LogoutCommand cmd, CancellationToken cancellationToken)
+            => await auth.LogoutAsync(cmd.RawRefreshToken, cancellationToken);
     }
 }

@@ -10,7 +10,9 @@ namespace Pos.Application.Common.Interfaces
         DbSet<Role> Roles { get; }
         DbSet<UserRole> UserRoles { get; }
         DbSet<Product> Products { get; }
-        
+        DbSet<PasswordResetToken> PasswordResetTokens { get; }
+
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

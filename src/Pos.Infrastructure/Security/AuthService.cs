@@ -203,4 +203,51 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
         var token = new JwtSecurityTokenHandler().WriteToken(jwt);
         return (token, expires);
     }
+
+    public async Task<ForgotPasswordResult> ForgotPasswordAsync(string email, CancellationToken ct)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+
+        var user = await db.Users
+            .FirstOrDefaultAsync(u => u.Email!.ToLower() == normalizedEmail, ct);
+
+        // SECURITY: never reveal if email exists
+        if (user is null)
+            return new ForgotPasswordResult(true, null);
+
+        var raw = TokenHelper.GenerateRefreshToken();
+        var hash = TokenHelper.Sha256(raw);
+
+        db.PasswordResetTokens.Add(new PasswordResetToken
+        {
+            UserId = user.Id,
+            TokenHash = hash,
+            CreatedDate = DateTime.UtcNow,
+            ExpiresDate = DateTime.UtcNow.AddMinutes(30)
+        });
+
+        await db.SaveChangesAsync(ct);
+
+        // DEV ONLY: return raw token
+        return new ForgotPasswordResult(true, raw);
+    }
+
+    public async Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct)
+    {
+        var hash = TokenHelper.Sha256(token);
+
+        var reset = await db.PasswordResetTokens
+            .Include(x => x.User)
+            .FirstOrDefaultAsync(x => x.TokenHash == hash, ct);
+
+        if (reset is null || reset.UsedAt != null || reset.ExpiresDate < DateTime.UtcNow)
+            throw new UnauthorizedAccessException("Invalid or expired reset token.");
+
+        reset.UsedAt = DateTime.UtcNow;
+
+        reset.User.PasswordHash = hasher.Hash(newPassword);
+        reset.User.UpdatedDate = DateTime.UtcNow;
+
+        await db.SaveChangesAsync(ct);
+    }
 }

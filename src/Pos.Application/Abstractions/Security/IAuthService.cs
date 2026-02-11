@@ -11,5 +11,7 @@ namespace Pos.Application.Abstractions.Security
         Task<AuthResponse> LoginAsync(LoginRequest req, CancellationToken ct);
         Task<RefreshResponse> RefreshAsync(string rawRefreshToken, CancellationToken ct);
         Task LogoutAsync(string? rawRefreshToken, CancellationToken ct);
+        Task<ForgotPasswordResult> ForgotPasswordAsync(string email, CancellationToken ct);
+        Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct);
     }
 }

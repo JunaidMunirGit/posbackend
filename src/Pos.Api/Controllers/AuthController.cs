@@ -2,18 +2,22 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pos.Application.Features.Auth.Commands.AssignRoleCommand;
+using Pos.Application.Features.Auth.Commands.ForgotPassword;
 using Pos.Application.Features.Auth.Commands.Login;
 using Pos.Application.Features.Auth.Commands.Logout;
 using Pos.Application.Features.Auth.Commands.RefreshToken;
 using Pos.Application.Features.Auth.Commands.Register;
+using Pos.Application.Features.Auth.Commands.ResetPassword;
 using Pos.Application.Features.Auth.Dtos;
+using Microsoft.AspNetCore.Hosting;
+
 
 namespace Pos.Api.Controllers;
 
 [ApiController]
 [Asp.Versioning.ApiVersion(1.0)]
 [Route("api/v{version:apiVersion}/[controller]")]
-public class AuthController(IMediator mediator) : ControllerBase
+public class AuthController(IMediator mediator, IWebHostEnvironment env) : ControllerBase
 {
     private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(30);
 
@@ -85,5 +89,25 @@ public class AuthController(IMediator mediator) : ControllerBase
         var ok = await mediator.Send(new AssignRoleCommand(req.UserId, req.RoleId), ct);
         return Ok(new { ok });
     }
+    [HttpPost("forgot-password")]
+    [AllowAnonymous]
+    public async Task<ActionResult<ForgotPasswordResult>> ForgotPassword([FromBody] ForgotPasswordRequest req, CancellationToken ct)
+    {
+        var result = await mediator.Send(new ForgotPasswordCommand(req.Email), ct);
 
+        // ✅ PROD: never expose token
+        if (!env.IsDevelopment())
+            return Ok(new ForgotPasswordResult(true, null));
+
+        // ✅ DEV: return token so you can test in Postman
+        return Ok(result);
+    }
+
+    [HttpPost("reset-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest req, CancellationToken ct)
+    {
+        await mediator.Send(new ResetPasswordCommand(req.Token, req.NewPassword), ct);
+        return Ok(new { ok = true });
+    }
 }
