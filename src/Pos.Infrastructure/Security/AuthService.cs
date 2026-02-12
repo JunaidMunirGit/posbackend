@@ -153,6 +153,7 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
             await db.SaveChangesAsync(ct);
         }
     }
+
     private async Task<(string token, DateTime expiresAtUtc)> CreateAccessTokenAsync(User user, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(user);
