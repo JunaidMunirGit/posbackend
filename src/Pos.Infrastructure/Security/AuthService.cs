@@ -29,6 +29,9 @@ public class AuthService(AppDbContext db, IPasswordHasher hasher, IConfiguration
 
         var user = new User
         {
+            FirstName = req.FirstName.Trim(),
+            LastName = req.LastName.Trim(),
+            PhoneNumber = req.PhoneNumber.Trim(),
             Email = email,
             Status = UserStatus.Active,
             CreatedDate = DateTime.UtcNow,
