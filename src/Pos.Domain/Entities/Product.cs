@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Pos.Domain.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Pos.Domain.Entities
 {
-    public class Product
+    public class Product : BaseEntity
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; }
         public string Barcode { get; set; } = null!;
         public decimal Price { get; set; }
     }
