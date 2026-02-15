@@ -63,7 +63,7 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
 
         Response.Cookies.Delete("refresh_token", new CookieOptions
         {
-            Path = "/api/Auth"
+            Path = "/"
         });
 
         return Ok(new { ok = true });
@@ -76,7 +76,7 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
             HttpOnly = true,
             Secure = true, // dev: http => false automatically
             SameSite = SameSiteMode.Strict,
-            Path = "/api/auth",
+            Path = "/api",
             Expires = DateTimeOffset.UtcNow.Add(RefreshTokenTtl)
         });
     }
