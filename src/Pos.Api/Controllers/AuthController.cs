@@ -41,6 +41,7 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         return Ok(res);
     }
 
+
     [HttpPost("refresh")]
     [AllowAnonymous]
     public async Task<ActionResult<RefreshResponse>> Refresh(CancellationToken ct)
