@@ -66,19 +66,14 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 
 builder.Services.AddAuthorization();
 
-// Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Clean Architecture DI
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 
-
-// Middleware DI
 builder.Services.AddScoped<SimpleIpRateLimitMiddleware>();
-
 
 
 builder.Services
@@ -87,7 +82,6 @@ builder.Services
         options.DefaultApiVersion = new ApiVersion(1, 0);
         options.AssumeDefaultVersionWhenUnspecified = true;
 
-        // We’ll use URL segment: /api/v{version}/...
         options.ApiVersionReader = new UrlSegmentApiVersionReader();
         options.ReportApiVersions = true;
     })

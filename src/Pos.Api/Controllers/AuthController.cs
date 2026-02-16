@@ -75,13 +75,12 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         Response.Cookies.Append("refresh_token", rawRefresh, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true, // dev: http => false automatically
+            Secure = true,
             SameSite = SameSiteMode.Strict,
             Path = "/api",
             Expires = DateTimeOffset.UtcNow.Add(RefreshTokenTtl)
         });
     }
-
 
     [HttpPost("assign-role")]
     [Authorize(Policy = "ManageUsers")]
@@ -90,6 +89,7 @@ public class AuthController(IMediator mediator, IWebHostEnvironment env) : Contr
         var ok = await mediator.Send(new AssignRoleCommand(req.UserId, req.RoleId), ct);
         return Ok(new { ok });
     }
+
     [HttpPost("forgot-password")]
     [AllowAnonymous]
     public async Task<ActionResult<ForgotPasswordResult>> ForgotPassword([FromBody] ForgotPasswordRequest req, CancellationToken ct)
