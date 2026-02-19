@@ -1,8 +1,9 @@
-﻿using Pos.Domain.Entities;
+﻿using Pos.Domain.Common;
+using Pos.Domain.Entities;
 
 namespace Pos.Domain.Security;
 
-public class UserRole
+public class UserRole : BaseEntity
 {
     public int UserId { get; set; }
     public User User { get; set; } = default!;

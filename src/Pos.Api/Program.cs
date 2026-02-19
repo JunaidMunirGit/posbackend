@@ -32,7 +32,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-
+            RoleClaimType = jwt["roles"],
             ValidIssuer = jwt["Issuer"],
             ValidAudience = jwt["Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(key),
@@ -51,18 +51,12 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ViewProducts",
         policy => policy.Requirements.Add(
             new PermissionRequirement("ViewProducts")));
+    options.AddPolicy("ManageUsers", u => u.RequireRole("Admin"));
 });
 
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("ManageProducts",
-        p => p.Requirements.Add(new PermissionRequirement("ManageProducts")));
-});
 
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
-
-
 
 builder.Services.AddAuthorization();
 
