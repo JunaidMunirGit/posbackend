@@ -17,6 +17,7 @@ namespace Pos.Api.Controllers;
 [ApiController]
 [Asp.Versioning.ApiVersion(1.0)]
 [Route("api/v{version:apiVersion}/[controller]")]
+
 public class AuthController(IMediator mediator, IWebHostEnvironment env) : ControllerBase
 {
     private static readonly TimeSpan RefreshTokenTtl = TimeSpan.FromDays(30);
