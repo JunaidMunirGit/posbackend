@@ -9,7 +9,6 @@ using Pos.Application.Features.Auth.Commands.RefreshToken;
 using Pos.Application.Features.Auth.Commands.Register;
 using Pos.Application.Features.Auth.Commands.ResetPassword;
 using Pos.Application.Features.Auth.Dtos;
-using Microsoft.AspNetCore.Hosting;
 
 
 namespace Pos.Api.Controllers;
